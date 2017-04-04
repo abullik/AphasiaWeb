@@ -33,16 +33,32 @@
             <li class="sidebar-brand">
                 <a href="#" onclick=$("#menu-close").click();>Меню</a>
             </li>
+            {% if logged_in %}
+{#            <li>#}
+{#                <a href="cabinet" onclick=$("#menu-close").click();>Личный кабинет</a>#}
+{#            </li>#}
+            {% if admin_role %}
             <li>
-                <a href="cabinet" onclick=$("#menu-close").click();>Личный кабинет</a>
+                <a href="/admin" onclick=$("#menu-close").click();>Панель управления</a>
             </li>
+            {% endif %}
             <li>
                 <a href="semantics" onclick=$("#menu-close").click();>Семантика</a>
             </li>
             <li>
                 <a href="grammar" onclick=$("#menu-close").click();>Грамматика</a>
             </li>
-
+            <li>
+                <a href="logout" onclick=$("#menu-close").click();>Выйти</a>
+            </li>
+            {% else %}
+            <li>
+                <a href="login" onclick=$("#menu-close").click();>Войти</a>
+            </li>
+            <li>
+                <a href="login" onclick=$("#menu-close").click();>Зарегистрироваться</a>
+            </li>
+            {% endif %}
         </ul>
     </nav>
 
@@ -50,9 +66,16 @@
     <header id="top" class="header">
         <div id="header" class="text-vertical-center">
             <h1>Aphasia Trainer</h1>
-            <br>
-            <a id="topic" href="grammar" class="btn btn-dark btn-lg">Грамматика</a>
-            <a id="topic" href="semantics" class="btn btn-dark btn-lg">Семантика</a>
+            {% if logged_in %}
+                <br/>
+                <span class="welcome">Здравствуйте, {{ name }}!</span><br/>
+                <a id="topic" href="grammar" class="btn btn-dark btn-lg">Грамматика</a>
+                <a id="topic" href="semantics" class="btn btn-dark btn-lg">Семантика</a>
+            {% else %}
+                <br/>
+                <a id="login-button" href="/login" class="btn btn-dark btn-lg">Войти</a>
+                <a id="login-button" href="/register" class="btn btn-dark btn-lg">Зарегистрироваться</a>
+            {% endif %}
         </div>
     </header>
     <!-- jQuery -->

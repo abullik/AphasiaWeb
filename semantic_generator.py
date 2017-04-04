@@ -5,6 +5,9 @@ import gensim.models.word2vec as vec
 import pymorphy2
 import random
 import logging
+import sqlite3
+
+PATIENTDB_PATH = "patientdb.db"
 
 
 class SingletonGenerator(type):
@@ -50,6 +53,13 @@ class TaskGenerator(metaclass=SingletonGenerator):
         self.__morph = pymorphy2.MorphAnalyzer()
         self.__model = vec.Word2Vec.load('word2vec')
 
+    def __abstract(self, file):
+        nouns = []
+        with open(file, 'r', encoding='utf-8') as f:
+            for noun in f:
+                nouns.append(noun.strip())
+        return nouns
+
     def __form_verb(self, verb):
         # Puts the given verb in Present Tense and 3rd person form
         return self.__morph.parse(verb)[0].inflect({'3per'}).word
@@ -80,10 +90,14 @@ class TaskGenerator(metaclass=SingletonGenerator):
         far_off = self.__model.most_similar(negative=[noun], topn=seed)
         new_nouns = []
 
+        abstract_nouns = self.__abstract('abstract_nouns.txt')
         for word, _ in far_off:
             if not re.search('^[а-я]*$', word):
                 continue
             for row in self.__morph.parse(word)[:3]:
+                if row.normal_form in abstract_nouns:
+                    logging.info("{} is abstract".format(word))
+                    break
                 if row.tag.POS in ['ADJF', 'NUMR']:
                     break
                 if self.__is_bad(row.tag):
@@ -102,27 +116,31 @@ class TaskGenerator(metaclass=SingletonGenerator):
         self.__names = []
         cases = ['nomn', 'gent', 'datv', 'accs', 'ablt', 'loct']
 
-        with open(os.path.join("data", topic + '_subjects.txt'), 'r', encoding='utf-8') as subjects:
-            for name in subjects:
-                self.__names.append(name.strip())
+        conn = sqlite3.connect(PATIENTDB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT task_markup, subjects_list FROM tasks WHERE id = ?;", [topic])
+        data = cursor.fetchone()
+
+        self.__names = [s.strip() for s in data[1].strip().split("\n")]
 
         self.__tails = dict()
         self.__verbs = []
         verb = ''
-        with open(os.path.join("data", topic + '.txt'), 'r', encoding='utf-8') as tails:
-            for tail in tails:
-                if not verb:
-                    verb = tail.strip()
-                    self.__verbs.append(verb)
-                    self.__tails[verb] = []
-                elif not tail.strip():
-                    verb = ''
+        tails = data[0].strip().split("\n")
+        for tail in tails:
+            if not verb:
+                verb = tail.strip()
+                self.__verbs.append(verb)
+                self.__tails[verb] = []
+            elif not tail.strip():
+                verb = ''
+            else:
+                stripped_tail = tail.strip().split()
+                if stripped_tail[-1] not in cases:
+                    self.__tails[verb].append((tail, 'accs'))
                 else:
-                    stripped_tail = tail.strip().split()
-                    if stripped_tail[-1] not in cases:
-                        self.__tails[verb].append((tail, 'accs'))
-                    else:
-                        self.__tails[verb].append((' '.join(stripped_tail[:-1]), stripped_tail[-1]))
+                    self.__tails[verb].append((' '.join(stripped_tail[:-1]), stripped_tail[-1]))
+        conn.close()
 
     def get_random(self, seed):
         # Generates a full task

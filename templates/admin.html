@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="static/css/bulma.css"/>
+    <script src="static/js/00af3f572c.js"></script>
+    <meta charset="UTF-8">
+    <title>Taskee</title>
+</head>
+<body class="is-fluid">
+<section class="hero is-primary">
+    <div class="hero-head">
+        <div class="container">
+            <nav class="nav">
+                <div class="nav-left">
+                    <a class="nav-item is-brand" href="/"><h1 class="subtitle">Taskee</h1></a>
+                </div>
+                <div class="nav-right nav-menu">
+                    <a class="nav-item" href="#">
+                        <div>{{ admin_name }} &emsp;</div>
+                        <span class="icon">
+                            <i class="fa fa-user-circle"></i>
+                        </span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <!--<h1 class="subtitle">Aphasia training</h1>-->
+    </div>
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">Добро пожаловать в кабинет</h1>
+        </div>
+    </div>
+    <div class="hero-foot">
+
+    </div>
+</section>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Последние сессии</h1>
+            <table class="table is-striped is-outlined">
+                <thead>
+                <tr>
+                    <th>Пациент</th>
+                    <th>Тест</th>
+                    <th>Дата</th>
+                    <th>Результат</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for key, session in sessions.items() %}
+                <tr>
+                <td>{{ session.name }}</td>
+                <td>{{ session.task_name }}</td>
+                <td>{{ session.time }}</td>
+                <td>{{ session.result }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+</section>
+<section class="section">
+    <div class="container">
+    <h1 class="title">Пользователи</h1>
+        <table class="table is-striped is-outlined">
+            <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Админ?</th>
+                <th>Почта</th>
+                <th>Удалить</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, user in users.items() %}
+            <tr>
+            <td>{{ user.name }}</td>
+            <td>{{ user.is_admin }}</td>
+            <td>{{ user.email }}</td>
+            <td> <a href="/delete_user?id={{ user.id }}">
+                <span class="icon"><i class="fa fa-remove"></i></span>
+            </a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    <a href="/add_user">Добавить пользователя</a>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+    <h1 class="title">Тесты</h1>
+        <table class="table is-striped is-outlined">
+            <thead>
+            <tr>
+                <th>Название</th>
+                <th>Удалить</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, test in tests.items() %}
+            <tr>
+            <td>{{ test.name }}</td>
+            <td> <a href="/delete_test?id={{ test.id }}">
+                <span class="icon"><i class="fa fa-remove"></i></span>
+            </a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    <a href="/add_test">Создать тест</a>
+    </div>
+</section>
+<section class="footer"><div class="container has-text-centered">Made by AFA Team</div></section>
+</body>
+</html>
